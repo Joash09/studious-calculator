@@ -16,9 +16,14 @@ Tools that could help
 
 2. [CVXPY Examples](http://www.cvxpy.org/examples/index.html)
 
+3. [Machine Learning CheatSheet](http://ml-cheatsheet.readthedocs.io/en/latest/)
+
 # Optimization courses
 1. [Stanford University](https://www.youtube.com/watch?v=McLq1hEq3UY&list=PL3940DD956CDF0622)\\
 This course covers how to use CVX package and various other algorithms etc.
+
+# Machine Learning Courses
+1. [Fast AI 8 lesson advanced course](http://course.fast.ai/index.html)
 
 # Other notes
 So there is code and stuff provided (which I struggle to follow sometimes), but I would like to get to a point when I could write my own code. As soon as I have some working code I'll send it through. So far I can just implement the structure of the neural net. \\
