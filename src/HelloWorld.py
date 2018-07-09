@@ -22,7 +22,7 @@ class NeuralNet:
             self.z_layer[i] = np.dot(self.weight[i-1], self.layer[i-1])+self.bias[i-1]
             self.layer[i] = sigmoid(self.z_layer[i])
 
-    def SGD(self, training_data, epochs, mini_batch_size, learning_rate):
+    def SGD(self, training_data, epochs, mini_batch_size, learning_rate, test_data=None):
         n = len(training_data)
         
 	#Set the mini batches
@@ -35,13 +35,12 @@ class NeuralNet:
 	#Iterate through each training element
 	#Backprop
 	#Adjust weights
-        for i in range(mini_batch_size):
-             y = mini_batches[0][i][1]#Expected Output
-             x = mini_batches[0][i][0]#Input
-             self.layer[0] = x
-             self.feedforward()#Propogate through the network for output
-             delta_weight, delta_bias = self.backprop(y)
-
+        for epoch in range(epochs):
+            for batch in mini_batches:
+                self.update_weight_bias(batch, learning_rate)
+            if test_data:
+                self.evaluate(test_data)
+       
     def backprop(self, y):
         def cost_derivative(y):
             return self.layer[-1]-y
@@ -55,24 +54,46 @@ class NeuralNet:
         error[-1] = np.multiply(cost_derivative(y), sp)
 
 	#Equation 2
-        for i in range(self.num_layers-2, 0, -1):
-            temp = np.dot(self.weight[i].transpose(), error[i])
-            sp = sigmoid_prime(self.z_layer[i])
-            error[i] = np.multiply(temp, sp)
+        for i in range(2, self.num_layers):
+            temp = np.dot(self.weight[-i+1].transpose(), error[-i+1])
+            sp = sigmoid_prime(self.z_layer[-i])
+            error[-i] = np.multiply(temp, sp)
 
 	#Equation 3
         delta_bias = error
 
 	#Equation 4
         delta_weight = []
-        for i in range(len(self.weight)):
-            delta_weight.append(np.dot(error[i], self.layer[i+1].transpose()))
-            print(delta_weight[i])
+        for i in range(2, self.num_layers):
+            delta_weight.append(np.dot(error[-i], self.layer[-i-1].transpose()))
 
         return delta_weight, delta_bias
 
-    def update_weight_bias(self, learning_rate):
-        pass 
+    def update_weight_bias(self, mini_batch, learning_rate):
+        nabla_weight = []; nabla_bias = [];	
+        for i in range(len(self.weight)):
+             nabla_weight.append(np.zeros(self.weight[i].shape))
+             nabla_bias.append(np.zeros(self.bias[i].shape))
+
+        for i in range(len(mini_batch)):
+             y = mini_batch[i][1]#Expected Output
+             x = mini_batch[i][0]#Input
+             self.layer[0] = x
+             self.feedforward()#Propogate through the network for output
+             delta_weight, delta_bias = self.backprop(y)
+             nabla_weight = nabla_weight+delta_weight
+             nabla_bias = nabla_bias+delta_bias
+        for i in range(len(self.weight)): 
+             self.weight[i] = self.weight[i]-((learning_rate/len(mini_batch))*nabla_weight[i])
+             self.bias[i] = self.bias[i]-((learning_rate/len(mini_batch))*nabla_bias[i])
+
+    def evaluate(self, test_data):
+        correct = 0;
+        for i in test_data:
+            self.layer[0] = i[0]
+            if (np.argmax(self.layer[-1])==i[1]):
+                correct+=1
+        print("Percentage correct: "+str(correct/len(test_data)))
 
 #Global Functions
 def sigmoid(x):
@@ -81,6 +102,9 @@ def sigmoid(x):
 def sigmoid_prime(x):
     return sigmoid(x)*(1-sigmoid(x))
 
-net = NeuralNet([784,30,10])
+net = NeuralNet([784,100,10])
 training_data, validation_data, test_data = MNIST_loader.wrapper()
-net.SGD(training_data, 100, 20, 0.1)
+net.SGD(training_data, 30, 20, 3.0, test_data=test_data)
+print("DONE!!!")
+net.evaluate(test_data)
+print(net.layer[-1])

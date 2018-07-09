@@ -26,7 +26,7 @@ def wrapper():
 	validation_data = list(zip(validation_input, va_d[1])) #Output is already in correct format
 
 	#Shaping test data
-	test_input = []
+	test_input = []; test_result = [];
 	for i in te_d[0]:
 		test_input.append(np.reshape(i, (784,1)))
 	test_data = list(zip(test_input, te_d[1])) #Output is already in correct format
