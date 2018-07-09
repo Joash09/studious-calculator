@@ -1,48 +1,63 @@
 import numpy as np
-import cvxpy as cvx #Convex optimization package
 
-# We will still learn how to read into the input vectors 
-# (rows, columns)
+class NeuralNet():
 
-class NeuralNet(x1, x2, x3):
-    def __init__():
-        #Strucutre
-        size_input = x1
-        size_hidden = x2
-        size_output = x3
+    def __init__(structure):
+
+        num_layers = len(structure)
+        layer = []; z_layer = []; weight=[]; bias=[];
         
-        #layers as column vectors
-        input_layer = np.zeros([size_input,1])
-        hidden_layer = np.zeros([size_hidden, 1])
-        output_layer = np.zeros([size_output, 1])
-
-        #Weights and biases
-        weight1 = np.random.randn([size_hidden, size_input])
-        bias1 = np.random.randn([size_hidden, 1])
-
-        weight2 = np.random.randn([size_output, size_hidden])
-        bias2 = np.random.randn([size_output, 1])
-
+        for i in range(num_layers):
+            layer.append(np.zeros([structure[i], 1]))
+            z_layer.append(np.zeros([structure[i], 1]))
+           
+        for i in range(1, num_layers):
+            weight.append(np.random.randn(structure[i], structure[i-1]))
+            bias.append(np.random.randn(structure[i], 1)
+                    
     def sigmoid(x):
-        return 1/(1+np.e**(-x))
+        return 1/(1+np.exp(-x))
 
-    def forward_prop(layer, prev_layer, weights, bias):
-        layer = sigmoid(np.dot(weights, prev_layer)+bias)
+    def sigmoid_prime(x):
+	#Derivative of activation function
+	return sigmoid(x)+1/sigmoid(x)
+                    
+    def feedforward():
+        for i in range(1, num_layers):
+            z_layer[i] = np.dot(weight[i], layer[i-1])+bias[i]
+        layer[i] = sigmoid(z_layer)
+
+    def SGD(training_data, epochs, mini_batch_size, learning_rate):
+        
+        random.shuffle(training_data)
+        
+        #select random training input size
+        for epoch in range(epochs):
+            for batch in range(mini_batch_size):
+                layer[0] = input_data
+                feedforward()
+                update_mini_batch()
+
+    def update_mini_batch():
+	pass
 
     def backprop():
-        
-    
-    def MSF(output, expected):
-        """Mean squares cost fucntion"""
-        return (output-expected)**2
+	error = []
+	for i in range(1, num_layers):
+		error.append(np.zeros(layer[i].shape))
+	
+	#Equation 1
+	sp = sigmoid_prime(z_layer[-1])
+	error[-1] = np.multiply(cost_derivative(), sp) #TODO Cost derivative
+	#Equation 2
+	for i in range(2, num_layers):
+		sp = sigmoid_prime(z_layer[-1*i])
+		error[-1*i] = np.multiply(np.dot(weight[i].transpose(), layer[i+1]), sp)
+	#Equation 3
+	dela_bias = error
+	#Equation 4
+	delta_weight = []
+	for i in range(1, num_layers):
+		delta_weight.append(np.dot(layer[i-1], error[i]))
 
- class Application():
-    def __main__():
-        net = new NeuralNet(100,15,10)
-        
-        #We want to feedforward, 
-        #Backpropogation!!!
-        #work out the cost of output(error), adjust weights and bias in relation to the error
-        #Input, feedforward, output error, backprop, gradient
-
-        
+	return delta_weight, dela_bias
