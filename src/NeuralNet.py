@@ -1,11 +1,11 @@
 import numpy as np
 
-class NeuralNet():
+class NeuralNet:
 
-    def __init__(structure):
+    def __init__(self, structure):
 
-        num_layers = len(structure)
-        layer = []; z_layer = []; weight=[]; bias=[];
+        self.num_layers = len(structure)
+        self.layer = []; self.z_layer = []; self.weight=[]; self.bias=[];
         
         for i in range(num_layers):
             layer.append(np.zeros([structure[i], 1]))
