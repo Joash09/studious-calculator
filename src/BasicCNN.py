@@ -1,40 +1,34 @@
 import numpy as np
-import cv2 as cv
 
-class CNN:
-    def ReLU(self, x):
-        if (x>0):
-            return x
-        return 0
+def convolve(image, kernal):
+    padded_kernal = np.zeros(image.shape)
+    padding = np.array(image.shape)-np.array(kernal.shape)
+    resolution_map = np.zeros(padding+1)
 
-    def __init__(self, structure):
-        self.num_layers = len(structure)
+    for x_shift in range(padding[0]+1):
+        for y_shift in range(padding[1]+1):
+            #Shifting the kernal
+            for x_k in range(kernal.shape[0]):
+                for y_k in range(kernal.shape[1]):
+                    padded_kernal[x_shift+x_k][y_shift+y_k]=kernal[x_k][y_k]
+            print(padded_kernal)
+            
+            #Do convolution
+            temp = np.sum(np.multiply(image, padded_kernal))
+            resolution_map[x_shift][y_shift] = temp
+            
+            #Reset the padded kernal
+            padded_kernal = np.zeros(image.shape)
+    return resolution_map
 
-        self.layer = [np.zeros([i,1]) for i in structure]
+def ReLU(x):
+    if np.where(x>0):
+        return x
+    return 0
 
-#img = cv.imread('../data/temp.jpg')
-def convolution(image, kernal):
-    x_kernal = kernal.shape[0]
-    y_kernal = kernal.shape[1]
-    feature_map = 0
-    #Iterates through each pixel
-    for x in range(4):
-        for y in range(4):
-            kernal_pixel = 0
-            for x_k in range(2):
-                for y_k in range(2):
-                    if (x==x_k and y==y_k):
-                        kernal_pixel += img[x][y]*kernal[x_k][y_k]
-            #Write to the feature map
-            print(kernal_pixel)
-
-#img = np.random.randint(0, 10, size=(4,4))
-#kernal = np.ones([2,2])
-#print(img)
-#print(kernal)
-#convolution(img, kernal)
-#net = CNN([resolution,15,10])
-
-image = cv.imread('opencv_logo.png')
-filter1 = np.identity(20)
-cv.convole(image, filter1)
+image = np.random.randint(0, 10, size=(3,9))
+kernal = np.ones([2,2])
+print(image); print(kernal)
+resolution_map = convolve(image, kernal)
+transform = ReLU(resolution_map)
+print(transform)
