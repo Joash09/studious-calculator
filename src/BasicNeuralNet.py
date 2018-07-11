@@ -25,16 +25,16 @@ class NeuralNet:
     def SGD(self, training_data, epochs, mini_batch_size, learning_rate, test_data=None):
         n = len(training_data)
         
-	#Set the mini batches
+	    #Set the mini batches
         mini_batches = []
         for i in range(0, n, mini_batch_size):
             mini_batches.append(training_data[i:i+mini_batch_size])
         shuffle(mini_batches)
 
-	#Iterate through each mini batch
-	#Iterate through each training element
-	#Backprop
-	#Adjust weights
+	    #Iterate through each mini batch
+	    #Iterate through each training element
+	    #Backprop
+	    #Adjust weights
         for epoch in range(epochs):
             for batch in mini_batches:
                 self.update_weight_bias(batch, learning_rate)
@@ -49,20 +49,20 @@ class NeuralNet:
         for i in range(1, self.num_layers):
             error.append(np.zeros(self.layer[i].shape))
 
-	#Equation 1
+	    #Equation 1
         sp = sigmoid_prime(self.z_layer[-1])
         error[-1] = np.multiply(cost_derivative(y), sp)
 
-	#Equation 2
+	    #Equation 2
         for i in range(2, self.num_layers):
             temp = np.dot(self.weight[-i+1].transpose(), error[-i+1])
             sp = sigmoid_prime(self.z_layer[-i])
             error[-i] = np.multiply(temp, sp)
 
-	#Equation 3
+	    #Equation 3
         delta_bias = error
 
-	#Equation 4
+	    #Equation 4
         delta_weight = []
         for i in range(2, self.num_layers):
             delta_weight.append(np.dot(error[-i], self.layer[-i-1].transpose()))
