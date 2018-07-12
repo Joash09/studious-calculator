@@ -23,6 +23,12 @@ def convolve(image, kernal):
             padded_kernal = np.zeros(image.shape)
     return resolution_map
 
+def convolve_color(layers, kernal):
+    convolved_image = []
+    for p in layers:
+        convolved_image.append(convolve(p, kernal))
+    return convolved_image
+
 def ReLU(x):
     if np.where(x>0):
         return x
@@ -31,6 +37,8 @@ def ReLU(x):
 def max_pool(img, region):
     
     down_sample = np.zeros([int(img.shape[0]/region[0]), int(img.shape[0]/region[1])])
+    print(down_sample.shape[1])
+    #down_sample = np.zeros(img.shape)
     for x in range(0, img.shape[0], region[0]):
         for y in range(0, img.shape[1], region[1]):
             max_val = np.max(img[x:x+region[0], y:y+region[1]])
@@ -48,22 +56,21 @@ edge_detection2 = np.array([[-1,-1,-1], [-1,-8,-1], [-1,-1,-1]])
 edge_detection3 = np.array([[1,0,-1], [0,0,0], [-1,0,1]]) #Works really well
 sharpen = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
 
-image = cv2.imread('opencv_logo.png')
+#Test Code
+#=========
+image = cv2.imread('test_image.jpg')
+image = image[0:400, 0:400] #This is a very crude solution. Will fix dimension problem later
 b,r,g = cv2.split(image)
-plt.imshow(b)
-plt.show()
-region = [25,25]
-down_sample = max_pool(b, region)
-plt.imshow(down_sample)
-plt.show()
-f1 = np.eye(10)
-out = convolve(down_sample, edge_detection3)
-print(out)
-plt.imshow(out)
+plt.imshow(g)
 plt.show()
 
-#kernal = np.eye(50)
-#resolution_map = convolve(b, kernal)
-#transform = ReLU(resolution_map)
-#plt.imshow(transform)
-#plt.show()
+region = [5,5]
+down_sample = max_pool(g, region)
+plt.imshow(down_sample)
+plt.show()
+
+resolution_map = convolve(down_sample, edge_detection3) #Convolution is very slow with my hardware, hence down sampling first
+print(resolution_map)
+transform = ReLU(resolution_map)
+plt.imshow(transform)
+plt.show()
