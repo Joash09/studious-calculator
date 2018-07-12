@@ -2,13 +2,14 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-def convolve(image, kernal):
+def convolve(image, kernal, stride):
+    #Still need to add zero_padding functionality
     padded_kernal = np.zeros(image.shape)
     padding = np.array(image.shape)-np.array(kernal.shape)
-    resolution_map = np.zeros(padding+1)
+    resolution_map = np.zeros(padding)
 
-    for x_shift in range(padding[0]+1):
-        for y_shift in range(padding[1]+1):
+    for x_shift in range(0, padding[0], stride):
+        for y_shift in range(0, padding[1], stride):
             #Shifting the kernal
             for x_k in range(kernal.shape[0]):
                 for y_k in range(kernal.shape[1]):
@@ -21,13 +22,15 @@ def convolve(image, kernal):
             
             #Reset the padded kernal
             padded_kernal = np.zeros(image.shape)
-    return resolution_map
+    
+    return resolution_map.astype(np.uint8)
 
-def convolve_color(layers, kernal):
+def convolve_color(layers, kernal, stride):
     convolved_image = []
     for p in layers:
-        convolved_image.append(convolve(p, kernal))
-    return convolved_image
+        convolved_image.append(convolve(p, kernal, stride).astype(np.uint8))
+        print("Done")
+    return cv2.merge((convolved_image[0], convolved_image[1], convolved_image[2]))
 
 def ReLU(x):
     if np.where(x>0):
@@ -36,15 +39,14 @@ def ReLU(x):
 
 def max_pool(img, region):
     
-    down_sample = np.zeros([int(img.shape[0]/region[0]), int(img.shape[0]/region[1])])
+    down_sample = np.zeros([int(img.shape[0]/region[0]), int(img.shape[1]/region[1])])
     for x in range(0, img.shape[0], region[0]):
         for y in range(0, img.shape[1], region[1]):
             max_val = np.max(img[x:x+region[0], y:y+region[1]])
             xcord = int(x/region[0])
             ycord = int(y/region[1])
             down_sample[xcord][ycord] = max_val
-    
-    return down_sample
+    return down_sample.astype(np.uint8)
 
 def max_pool_color(layers, region):
     image = []
@@ -59,23 +61,20 @@ edge_detection1 = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
 edge_detection2 = np.array([[-1,-1,-1], [-1,-8,-1], [-1,-1,-1]])
 edge_detection3 = np.array([[1,0,-1], [0,0,0], [-1,0,1]]) #Works really well
 sharpen = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
+guassion_blur = np.array([[1,2,1], [2,4,2],[1,2,1]])*(1/16)
 
-#Structure
-#=========
-#num_layers = 3
-#input_image_size = [400,400]
-#input_layer = np.zeros(input_image_size)
-#kernal_size = (3,3)
-#num_kernals = 3
-#weight = [np.random.randn([kernal_size, num_kernals]) for i in num_layers-1]
 
 
 #Test Code
 #=========
-image = cv2.imread('test_image.jpg')
-image = image[0:400, 0:400] #This is a very crude solution. Will fix dimension problem later
+image = cv2.imread('opencv_logo.png')
+b,g,r = cv2.split(image)
 
-b,r,g = cv2.split(image)
-new_im = max_pool_color((b,r,g), [5,5])
+new_im = max_pool_color((b,g,r), [10,10])
+plt.imshow(new_im)
+plt.show()
+
+new_im = convolve(b, edge_detection3, 1)
+#new_im = convolve_color((b,r,g), edge_detection3, 1)
 plt.imshow(new_im)
 plt.show()
