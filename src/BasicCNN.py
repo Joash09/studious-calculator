@@ -37,8 +37,6 @@ def ReLU(x):
 def max_pool(img, region):
     
     down_sample = np.zeros([int(img.shape[0]/region[0]), int(img.shape[0]/region[1])])
-    print(down_sample.shape[1])
-    #down_sample = np.zeros(img.shape)
     for x in range(0, img.shape[0], region[0]):
         for y in range(0, img.shape[1], region[1]):
             max_val = np.max(img[x:x+region[0], y:y+region[1]])
@@ -48,6 +46,12 @@ def max_pool(img, region):
     
     return down_sample
 
+def max_pool_color(layers, region):
+    image = []
+    for layer in layers:
+        image.append(max_pool(layer, region))
+    return cv2.merge((image[0], image[1], image[2]))
+
 #Different types of filters
 #==========================
 identity = np.array([[0,0,0],[0,1,0],[0,0,0]])
@@ -56,21 +60,22 @@ edge_detection2 = np.array([[-1,-1,-1], [-1,-8,-1], [-1,-1,-1]])
 edge_detection3 = np.array([[1,0,-1], [0,0,0], [-1,0,1]]) #Works really well
 sharpen = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
 
+#Structure
+#=========
+#num_layers = 3
+#input_image_size = [400,400]
+#input_layer = np.zeros(input_image_size)
+#kernal_size = (3,3)
+#num_kernals = 3
+#weight = [np.random.randn([kernal_size, num_kernals]) for i in num_layers-1]
+
+
 #Test Code
 #=========
 image = cv2.imread('test_image.jpg')
 image = image[0:400, 0:400] #This is a very crude solution. Will fix dimension problem later
+
 b,r,g = cv2.split(image)
-plt.imshow(g)
-plt.show()
-
-region = [5,5]
-down_sample = max_pool(g, region)
-plt.imshow(down_sample)
-plt.show()
-
-resolution_map = convolve(down_sample, edge_detection3) #Convolution is very slow with my hardware, hence down sampling first
-print(resolution_map)
-transform = ReLU(resolution_map)
-plt.imshow(transform)
+new_im = max_pool_color((b,r,g), [5,5])
+plt.imshow(new_im)
 plt.show()
