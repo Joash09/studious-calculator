@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from NeuralNet import NeuralNet
 
 def convolve(image, kernal, stride):
     #Still need to add zero_padding functionality
@@ -37,11 +38,10 @@ def ReLU(x):
     return 0
 
 def max_pool(img, region):
-    down_sample = np.zeros([11,11])
-    #down_sample = np.zeros([int(img.shape[0]/region[0]), int(img.shape[1]/region[1])])
+    down_sample = np.zeros([int(np.floor(img.shape[0]/region[0])+1), int(np.floor(img.shape[1]/region[1])+1)])
     for x in range(0, img.shape[0], region[0]):
         for y in range(0, img.shape[1], region[1]):
-            max_val = np.average(img[x:x+region[0], y:y+region[1]])
+            max_val = np.max(img[x:x+region[0], y:y+region[1]])
             xcord = int(x/region[0])
             ycord = int(y/region[1])
             down_sample[xcord][ycord] = max_val
@@ -67,28 +67,53 @@ def appy_filters(img, stride):
     #Different types of filters
     #==========================
     identity = np.array([[0,0,0],[0,1,0],[0,0,0]])
+
     edge_detection1 = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
     edge_detection2 = np.array([[-1,-1,-1], [-1,-8,-1], [-1,-1,-1]])#Rubbish
     edge_detection3 = np.array([[1,0,-1], [0,0,0], [-1,0,1]]) #Works really well
+    
     sharpen = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
+    
     guassion_blur = np.array([[1,2,1], [2,4,2],[1,2,1]])*(1/16)
+    
+    sobel = np.array([[1,2,1], [0,0,0], [-1,-2,-1]]) #Works the best for faces
     #==========================
     
     feature_maps.append(convolve(img, edge_detection1, stride))
-    feature_maps.append(convolve(img, edge_detection2, stride))
+    #feature_maps.append(convolve(img, edge_detection2, stride))
     feature_maps.append(convolve(img, edge_detection3, stride))
-    feature_maps.append(convolve(img, guassion_blur, stride))
+    feature_maps.append(convolve(img, sobel, stride))
+    #feature_maps.append(convolve(img, prewitt, stride))
+    #feature_maps.append(convolve(img, gradient,stride))
 
     return feature_maps
 
-
 #Test Code
 #=========
-image = cv2.imread('test2.jpg', 0)
-feature_maps = appy_filters(image, 1)
+image = cv2.imread('test3.jpg', 0)
 
-plt.figure(1)
+#plt.figure(1)
+#lt.imshow(image)
+#plt.show()
+
+feature_maps = appy_filters(image, 1)
+#feature_maps[-1] = ReLU(feature_maps[-1])
+plt.figure(3)
+plt.imshow(max_pool(feature_maps[-1], [5,5]), cmap='gray')
+plt.show()
+
+plt.figure(4)
+plt.imshow(max_pool(feature_maps[-1], [5,5]), cmap='gray')
+plt.show()
+
+plt.figure(2)
 for i in range(1,len(feature_maps)+1):
     plt.subplot(str(len(feature_maps))+str(1)+str(i))
-    plt.imshow(feature_maps[i-1])
-plt.show()
+    plt.imshow(ReLU(feature_maps[i-1]), cmap='gray')
+#plt.show()
+
+input_layer = image_to_input(feature_maps[0])
+#print(image_to_input(feature_maps[0]))
+net = NeuralNet([9409, 20, 10])
+net.layers[0] = input_layer
+print(net.layers[0])
