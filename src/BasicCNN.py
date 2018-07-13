@@ -61,40 +61,34 @@ def image_to_input(img):
     h = img.shape[1]
     return np.reshape((w*h), 1)
 
-#Different types of filters
-#==========================
-identity = np.array([[0,0,0],[0,1,0],[0,0,0]])
-edge_detection1 = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
-edge_detection2 = np.array([[-1,-1,-1], [-1,-8,-1], [-1,-1,-1]])#Rubbish
-edge_detection3 = np.array([[1,0,-1], [0,0,0], [-1,0,1]]) #Works really well
-sharpen = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
-guassion_blur = np.array([[1,2,1], [2,4,2],[1,2,1]])*(1/16)
+def appy_filters(img, stride):
+    feature_maps = []
+    
+    #Different types of filters
+    #==========================
+    identity = np.array([[0,0,0],[0,1,0],[0,0,0]])
+    edge_detection1 = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
+    edge_detection2 = np.array([[-1,-1,-1], [-1,-8,-1], [-1,-1,-1]])#Rubbish
+    edge_detection3 = np.array([[1,0,-1], [0,0,0], [-1,0,1]]) #Works really well
+    sharpen = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
+    guassion_blur = np.array([[1,2,1], [2,4,2],[1,2,1]])*(1/16)
+    #==========================
+    
+    feature_maps.append(convolve(img, edge_detection1, stride))
+    feature_maps.append(convolve(img, edge_detection2, stride))
+    feature_maps.append(convolve(img, edge_detection3, stride))
+    feature_maps.append(convolve(img, guassion_blur, stride))
+
+    return feature_maps
 
 
 #Test Code
 #=========
 image = cv2.imread('test2.jpg', 0)
-#plt.show()
-#plt.plot()
+feature_maps = appy_filters(image, 1)
 
 plt.figure(1)
-#Edge dectection 1
-resolution_1 = convolve(image, edge_detection1, 1)
-plt.subplot(211)
-plt.imshow(resolution_1, cmap='gray')
-
-#Edge dectection 3
-resolution_2 = convolve(image, edge_detection3, 1)
-plt.subplot(212)
-plt.imshow(resolution_2, cmap='gray')
+for i in range(1,len(feature_maps)+1):
+    plt.subplot(str(len(feature_maps))+str(1)+str(i))
+    plt.imshow(feature_maps[i-1])
 plt.show()
-
-#Max Pool
-#resolution_2 = convolve(resolution_2,guassion_blur,1)
-#resolution_2 = np.fft(resolution_2)
-print(resolution_2)
-plt.figure(2)
-plt.imshow(resolution_2)
-plt.show()
-
-print(image_to_input(resolution_2))
