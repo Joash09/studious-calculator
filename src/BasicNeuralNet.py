@@ -70,10 +70,8 @@ class NeuralNet:
         return delta_weight, delta_bias
 
     def update_weight_bias(self, mini_batch, learning_rate):
-        nabla_weight = []; nabla_bias = [];	
-        for i in range(len(self.weight)):
-             nabla_weight.append(np.zeros(self.weight[i].shape))
-             nabla_bias.append(np.zeros(self.bias[i].shape))
+        nabla_weight = [np.zeros(i.shape) for i in self.weight]
+        nabla_bias = [np.zeros(i.shape) for i in self.bias]
 
         for i in range(len(mini_batch)):
              y = mini_batch[i][1]#Expected Output
@@ -81,14 +79,16 @@ class NeuralNet:
              self.layer[0] = x
              self.feedforward()#Propogate through the network for output
              delta_weight, delta_bias = self.backprop(y)
-             nabla_weight = nabla_weight+delta_weight
-             nabla_bias = nabla_bias+delta_bias
+             
+             nabla_weight = [np.add(nabla_weight[i],delta_weight[i]) for i in range(len(self.weight))]
+             nabla_bias = [np.add(nabla_bias[i],delta_bias[i]) for i in range(len(self.bias))]
+
         for i in range(len(self.weight)): 
              self.weight[i] = self.weight[i]-((learning_rate/len(mini_batch))*nabla_weight[i])
              self.bias[i] = self.bias[i]-((learning_rate/len(mini_batch))*nabla_bias[i])
 
     def evaluate(self, test_data):
-        correct = 0;
+        correct = 0
         for i in test_data:
             self.layer[0] = i[0]
             if (np.argmax(self.layer[-1])==i[1]):

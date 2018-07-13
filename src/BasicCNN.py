@@ -54,6 +54,13 @@ def max_pool_color(img, region):
     r = max_pool(r, region)
     return cv2.merge((b,g,r))
 
+def image_to_input(img):
+    #Image to input column vector for the fully connected network
+    #Only works for a 2D image
+    w = img.shape[0]
+    h = img.shape[1]
+    return np.reshape((w*h), 1)
+
 #Different types of filters
 #==========================
 identity = np.array([[0,0,0],[0,1,0],[0,0,0]])
@@ -74,18 +81,20 @@ plt.figure(1)
 #Edge dectection 1
 resolution_1 = convolve(image, edge_detection1, 1)
 plt.subplot(211)
-plt.imshow(resolution_1)
+plt.imshow(resolution_1, cmap='gray')
 
 #Edge dectection 3
-resolution_2 = convolve(image, edge_detection2, 1)
+resolution_2 = convolve(image, edge_detection3, 1)
 plt.subplot(212)
-plt.imshow(resolution_2)
+plt.imshow(resolution_2, cmap='gray')
 plt.show()
 
 #Max Pool
 #resolution_2 = convolve(resolution_2,guassion_blur,1)
-resolution_2 = ReLU(resolution_2)
+#resolution_2 = np.fft(resolution_2)
 print(resolution_2)
 plt.figure(2)
 plt.imshow(resolution_2)
 plt.show()
+
+print(image_to_input(resolution_2))
